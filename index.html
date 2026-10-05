@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dusk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Living Room</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;600&family=Space+Grotesk:wght@500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--font:'Poppins',sans-serif;--rx:-18deg;--ry:-28deg;--zoom:1}
+[data-theme=dusk]{--bg1:#2b1b4d;--bg2:#d4688a;--wall:#7a5c9e;--wall2:#5d4580;--floor:#3b2a2a;--sofa:#e0826b;--wood:#8a5a3b;--accent:#ffd36b;--sky1:#ff9a6b;--sky2:#472a6b;--text:#fff}
+[data-theme=sand]{--bg1:#f3e6cf;--bg2:#cfae80;--wall:#ecdcc0;--wall2:#d6c19c;--floor:#a9794c;--sofa:#4f7a73;--wood:#6b4a2f;--accent:#e08a2e;--sky1:#9fd6f5;--sky2:#e9f6ff;--text:#2d2216}
+[data-theme=forest]{--bg1:#0f2a22;--bg2:#3d7a58;--wall:#4f7f68;--wall2:#3c6653;--floor:#4a3a2a;--sofa:#c9b37a;--wood:#6a4b2b;--accent:#b9f27c;--sky1:#79c7a1;--sky2:#17433a;--text:#fff}
+[data-theme=neon]{--bg1:#07071a;--bg2:#3a0f6b;--wall:#1c1c47;--wall2:#14143a;--floor:#0d0d22;--sofa:#ff3d9a;--wood:#2b2b66;--accent:#2ef2ff;--sky1:#2a0f5e;--sky2:#050514;--text:#fff}
+body{margin:0;height:100vh;overflow:hidden;font-family:var(--font);color:var(--text);background:radial-gradient(circle at 50% 60%,var(--bg2),var(--bg1) 70%);transition:background .8s}
+.navbar{background:rgba(0,0,0,.28)!important;backdrop-filter:blur(8px);position:relative;z-index:10}
+.navbar-brand{font-family:var(--font);font-weight:600}
+.dropdown-menu{font-family:var(--font)}
+#stage{position:absolute;inset:56px 0 0 0;perspective:1500px;cursor:grab;touch-action:none}
+#stage:active{cursor:grabbing}
+#scene{position:absolute;left:50%;top:62%;width:0;height:0;transform-style:preserve-3d;transform:scale(var(--zoom)) rotateX(var(--rx)) rotateY(var(--ry))}
+#scene.orbit{animation:orbit 24s ease-in-out infinite alternate}
+@keyframes orbit{from{transform:scale(var(--zoom)) rotateX(-18deg) rotateY(-50deg)}to{transform:scale(var(--zoom)) rotateX(-14deg) rotateY(20deg)}}
+.p,.box,.f{position:absolute;transform-style:preserve-3d}
+.f{backface-visibility:hidden;background:var(--c);transition:background .8s}
+.f.t{filter:brightness(1.15)}.f.s{filter:brightness(.82)}.f.k{filter:brightness(.65)}.f.b{filter:brightness(.5)}
+.wall{background:linear-gradient(var(--wall),var(--wall2));transition:background .8s;box-shadow:inset 0 -30px 60px rgba(0,0,0,.25)}
+.floor{background:repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 60px),var(--floor);transition:background .8s}
+.glow{background:radial-gradient(closest-side,rgba(255,214,120,.65),transparent);transition:opacity .5s;pointer-events:none}
+.off .glow,.off .shade .f{opacity:.25}
+.sway{animation:sway 4s ease-in-out infinite alternate;transform-origin:50% 100%}
+@keyframes sway{to{transform:rotateZ(5deg)}}
+.pulse{animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{50%{filter:brightness(1.25)}}
+.window{background:linear-gradient(var(--sky1),var(--sky2));border:8px solid var(--wood);overflow:hidden;box-sizing:border-box}
+.cloud{position:absolute;width:70px;height:22px;border-radius:20px;background:rgba(255,255,255,.7);filter:blur(2px);animation:drift 22s linear infinite}
+@keyframes drift{from{left:-80px}to{left:170px}}
+.frame{border:8px solid var(--wood);background:#000;box-sizing:border-box;border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.frame .carousel,.frame .carousel-inner,.frame .carousel-item{height:100%}
+.slide{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center}
+.slide i{font-size:2.6rem;animation:float 3s ease-in-out infinite}
+.slide h5{font-family:var(--font);margin:.3rem 0 0;font-size:1rem}
+@keyframes float{50%{transform:translateY(-6px) scale(1.1)}}
+.carousel-item{transition:transform .9s ease,opacity .9s ease}
+.hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;opacity:.75;font-size:.85rem;pointer-events:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<nav class="navbar navbar-dark px-3">
+  <span class="navbar-brand"><i class="bi bi-house-heart-fill me-2" style="color:var(--accent)"></i>3D Living Room</span>
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-palette-fill"></i> Theme</button>
+      <ul class="dropdown-menu dropdown-menu-end" id="themes">
+        <li><button class="dropdown-item" data-v="dusk"><i class="bi bi-sunset"></i> Dusk</button></li>
+        <li><button class="dropdown-item" data-v="sand"><i class="bi bi-sun"></i> Sand</button></li>
+        <li><button class="dropdown-item" data-v="forest"><i class="bi bi-tree"></i> Forest</button></li>
+        <li><button class="dropdown-item" data-v="neon"><i class="bi bi-lightning-charge"></i> Neon</button></li>
+      </ul>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown"><i class="bi bi-fonts"></i> Font</button>
+      <ul class="dropdown-menu dropdown-menu-end" id="fonts">
+        <li><button class="dropdown-item" style="font-family:Poppins" data-v="'Poppins',sans-serif">Poppins</button></li>
+        <li><button class="dropdown-item" style="font-family:'Playfair Display'" data-v="'Playfair Display',serif">Playfair Display</button></li>
+        <li><button class="dropdown-item" style="font-family:'Space Grotesk'" data-v="'Space Grotesk',sans-serif">Space Grotesk</button></li>
+        <li><button class="dropdown-item" style="font-family:Caveat" data-v="'Caveat',cursive">Caveat</button></li>
+      </ul>
+    </div>
+    <div class="btn-group btn-group-sm">
+      <button class="btn btn-outline-light" id="left" title="Rotate left"><i class="bi bi-arrow-counterclockwise"></i></button>
+      <button class="btn btn-outline-light" id="orbit" title="Auto orbit"><i class="bi bi-camera-reels"></i></button>
+      <button class="btn btn-outline-light" id="right" title="Rotate right"><i class="bi bi-arrow-clockwise"></i></button>
+    </div>
+    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" id="lamp" checked><label class="form-check-label" for="lamp"><i class="bi bi-lightbulb-fill"></i></label></div>
+    <input type="range" class="form-range" id="zoom" min=".6" max="1.5" step=".05" value="1" style="width:90px" title="Zoom">
+  </div>
+</nav>
+<div id="stage"><div id="scene"></div><div class="hint"><i class="bi bi-hand-index-thumb"></i> Drag to look around</div></div>
+
+<template id="gallery">
+  <div id="show" class="carousel carousel-fade slide" data-bs-ride="carousel" data-bs-interval="3500">
+    <div class="carousel-indicators" style="margin-bottom:.1rem"><button data-bs-target="#show" data-bs-slide-to="0" class="active"></button><button data-bs-target="#show" data-bs-slide-to="1"></button><button data-bs-target="#show" data-bs-slide-to="2"></button></div>
+    <div class="carousel-inner">
+      <div class="carousel-item active"><div class="slide" style="background:linear-gradient(135deg,#ff7e5f,#feb47b)"><i class="bi bi-cup-hot-fill"></i><h5>Slow mornings</h5></div></div>
+      <div class="carousel-item"><div class="slide" style="background:linear-gradient(135deg,#43cea2,#185a9d)"><i class="bi bi-book-half"></i><h5>Quiet reading</h5></div></div>
+      <div class="carousel-item"><div class="slide" style="background:linear-gradient(135deg,#8e2de2,#4a00e0)"><i class="bi bi-film"></i><h5>Movie nights</h5></div></div>
+    </div>
+    <button class="carousel-control-prev" data-bs-target="#show" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+    <button class="carousel-control-next" data-bs-target="#show" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+  </div>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+const scene = document.getElementById('scene'), root = document.documentElement;
+const el = (cls, css, parent = scene, html = '') => { const e = document.createElement('div'); e.className = cls; Object.assign(e.style, css); e.innerHTML = html; parent.appendChild(e); return e; };
+const px = n => n + 'px';
+
+// Plane centred on (x, y-from-floor, z) with extra transform
+function plane(w, h, x, y, z, rot, cls = '', parent = scene, html = '') {
+  return el('p ' + cls, { width: px(w), height: px(h), left: px(-w / 2), top: px(-h / 2),
+    transform: `translate3d(${x}px,${-y}px,${z}px) ${rot}` }, parent, html);
+}
+// Cuboid: x,z centre, y = bottom edge
+function box(w, h, d, x, y, z, color, ry = 0, parent = scene) {
+  const b = el('box', { transform: `translate3d(${x}px,${-(y + h / 2)}px,${z}px) rotateY(${ry}deg)`, '--c': color }, parent);
+  const face = (fw, fh, t, c) => el('f ' + c, { width: px(fw), height: px(fh), left: px(-fw / 2), top: px(-fh / 2), transform: t }, b);
+  face(w, h, `translateZ(${d / 2}px)`, 'k');
+  face(w, h, `rotateY(180deg) translateZ(${d / 2}px)`, 'b');
+  face(d, h, `rotateY(90deg) translateZ(${w / 2}px)`, 's');
+  face(d, h, `rotateY(-90deg) translateZ(${w / 2}px)`, 's');
+  face(w, d, `rotateX(90deg) translateZ(${h / 2}px)`, 't');
+  face(w, d, `rotateX(-90deg) translateZ(${h / 2}px)`, 'b');
+  return b;
+}
+const V = n => `var(--${n})`;
+
+// Room shell
+plane(600, 600, 0, 0, 0, 'rotateX(90deg)', 'floor');
+plane(600, 360, 0, 180, -300, '', 'wall');
+plane(600, 360, -300, 180, 0, 'rotateY(90deg)', 'wall');
+plane(600, 360, 300, 180, 0, 'rotateY(-90deg)', 'wall');
+plane(600, 14, 0, 7, -299, '', 'floor');
+
+// Window (right wall) with drifting clouds
+const win = plane(170, 150, 299, 200, -90, 'rotateY(-90deg)', 'window');
+['12px','50px','85px'].forEach((t, i) => el('cloud', { top: t, animationDelay: -i * 7 + 's' }, win));
+plane(8, 150, 298, 200, -90, 'rotateY(-90deg)', 'window').style.background = V('wood');
+
+// Slideshow frame (back wall)
+plane(290, 160, 0, 235, -298, '', 'frame', scene, document.getElementById('gallery').innerHTML);
+
+// Rug
+box(280, 3, 200, 10, 0, 20, '#b0485f');
+box(220, 4, 140, 10, 0, 20, V('accent'));
+
+// Sofa
+const sofa = el('box', { transform: 'translate3d(0,0,0)' });
+box(260, 45, 100, 0, 0, -245, V('sofa'), 0, sofa);
+box(260, 60, 24, 0, 45, -283, V('sofa'), 0, sofa);
+[-141, 141].forEach(x => box(24, 68, 100, x, 0, -245, V('sofa'), 0, sofa));
+[-58, 58].forEach(x => box(112, 16, 72, x, 45, -235, V('sofa'), 0, sofa));
+[-95, 95].forEach(x => box(34, 34, 12, x, 61, -250, V('accent'), 0, sofa));
+
+// Coffee table + books
+box(150, 8, 80, 10, 38, -60, V('wood'));
+[[-62, -28], [62, -28], [-62, 28], [62, 28]].forEach(([x, z]) => box(8, 38, 8, 10 + x, 0, -60 + z, V('wood')));
+box(34, 7, 24, -20, 46, -60, '#d9534f', 15);
+box(28, 5, 20, -20, 53, -60, '#f0ad4e', -10);
+box(24, 12, 24, 50, 46, -60, '#fff');
+
+// Bookcase (left wall)
+box(46, 210, 150, -275, 0, -110, V('wood'));
+const colors = ['#e74c3c', '#f1c40f', '#3498db', '#2ecc71', '#9b59b6', '#ecf0f1'];
+[40, 95, 150, 195].forEach((y, r) => { for (let i = 0; i < 9; i++) box(14, 30 + (i * 7 % 12), 10, -250, y - 10, -170 + i * 14 + r, colors[(i + r) % 6]); });
+
+// Plant (swaying leaves)
+box(36, 34, 36, 235, 0, -240, '#b5653a');
+const leaves = el('p sway', { transform: 'translate3d(235px,-34px,-240px)' });
+[0, 60, 120].forEach(a => box(6, 70, 40, 0, 0, 0, '#2fa05a', a, leaves));
+[0, 60, 120].forEach(a => box(5, 45, 30, 0, 50, 0, '#46c473', a + 30, leaves));
+
+// Floor lamp with light pool
+const lamp = el('p', { transform: 'translate3d(-225px,0,-250px)' });
+lamp.id = 'lampGrp';
+box(40, 4, 40, 0, 0, 0, '#222', 0, lamp);
+box(6, 150, 6, 0, 4, 0, '#222', 0, lamp);
+const shade = el('p shade pulse', {}, lamp);
+box(50, 38, 50, 0, 150, 0, '#fff3c4', 0, shade);
+el('glow', { width: '320px', height: '320px', left: '-160px', top: '-160px', transform: 'translate3d(0,-1px,60px) rotateX(90deg)' }, lamp);
+
+// Controls
+const themeNames = ['dusk', 'sand', 'forest', 'neon'];
+document.querySelectorAll('#themes button').forEach(b => b.onclick = () => root.dataset.theme = b.dataset.v);
+document.querySelectorAll('#fonts button').forEach(b => b.onclick = () => root.style.setProperty('--font', b.dataset.v));
+document.getElementById('lamp').onchange = e => scene.classList.toggle('off', !e.target.checked);
+document.getElementById('zoom').oninput = e => root.style.setProperty('--zoom', e.target.value);
+let ry = -28, rx = -18;
+const apply = () => { root.style.setProperty('--ry', ry + 'deg'); root.style.setProperty('--rx', rx + 'deg'); };
+document.getElementById('left').onclick = () => { ry -= 15; apply(); };
+document.getElementById('right').onclick = () => { ry += 15; apply(); };
+document.getElementById('orbit').onclick = () => scene.classList.toggle('orbit');
+
+// Drag to rotate
+const stage = document.getElementById('stage'); let drag = null;
+stage.addEventListener('pointerdown', e => { if (e.target.closest('.frame')) return; drag = { x: e.clientX, y: e.clientY }; scene.classList.remove('orbit'); stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointermove', e => { if (!drag) return; ry += (e.clientX - drag.x) * .4; rx = Math.max(-50, Math.min(-3, rx - (e.clientY - drag.y) * .25)); drag = { x: e.clientX, y: e.clientY }; apply(); });
+stage.addEventListener('pointerup', () => drag = null);
+</script>
+</body>
+</html>
